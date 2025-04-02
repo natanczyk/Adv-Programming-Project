@@ -47,9 +47,16 @@ end
 
 
 # Check if a restart is available
-# chatGPT Code!
 function available_restart(name::Symbol)
-    return haskey(RESTART_STACK, name)
+    for frame in reverse(RESTART_STACK)
+        for (restart_name, callback) in frame
+            if name  == restart_name
+                return true
+            end
+        end
+    end
+
+    return false
 end
 
 
@@ -57,7 +64,13 @@ end
 # chatGPT Code!
 function invoke_restart(name::Symbol, args...)
     if available_restart(name)
-        return RESTART_STACK[name](args...)
+        for frame in reverse(RESTART_STACK)
+            for (restart_name, callback) in frame
+                if name  == restart_name
+                    return callback
+                end
+            end
+        end
     else
         error("Restart $name not available")
     end
@@ -120,4 +133,3 @@ to_escape() do exit
         end
     end
 end
-
