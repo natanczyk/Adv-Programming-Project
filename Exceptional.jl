@@ -5,7 +5,7 @@ struct EscapeException <: Exception
 end
 
 # Define global stacks for restarts and handlers
-const RESTART_STACK = Dict{Symbol, Function}()
+const RESTART_STACK = Vector{Vector{Pair{Symbol, Function}}}()
 const HANDLER_STACK = Vector{Vector{Pair{Type{DivisionByZero}, Function}}}()
 
 # Execute most recent handler
@@ -79,24 +79,14 @@ function available_restart(name::Symbol)
     return haskey(RESTART_STACK, name)
 end
 
-#=
-# Invoke a restart
-# chatGPT Code!
-function invoke_restart(name::Symbol, args...)
+
+function invoke_restart(name::Symbol, args... )
+    # Check if the restart is available in the RESTART_STACK
     if available_restart(name)
+        # If available, invoke the corresponding restart function with arguments
         return RESTART_STACK[name](args...)
     else
-        error("Restart $name not available")
-    end
-end
-=#
-
-function invoke_restart(name::Symbol, args...)
-    if available_restart(name)
-        to_escape() do exit  # Create an escape point
-            exit(RESTART_STACK[name](args...))  # Call the restart and exit
-        end
-    else
+        # If not available, throw an error or handle the case
         error("Restart $name not available")
     end
 end
