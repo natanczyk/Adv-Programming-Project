@@ -63,17 +63,6 @@ function invoke_restart(name::Symbol, args...)
     end
 end
 
-
-function invoke_restart(name::Symbol, args...)
-    if available_restart(name)
-        to_escape() do exit  # Create an escape point
-            exit(RESTART_STACK[name](args...))  # Call the restart and exit
-        end
-    else
-        error("Restart $name not available")
-    end
-end
-
 function to_escape(f::Function)
     try
         return f(x -> throw(EscapeException(x)))  # `x` is the exit function
