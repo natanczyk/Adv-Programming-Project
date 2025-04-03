@@ -20,7 +20,7 @@ end
 reciprocal2(value) =
     with_restart(:return_zero => ()->0,
             :return_value => identity,
-            :retry_using => reciprocal) do
+            :retry_using => reciprocal2) do
         value == 0 ?
             error(DivisionByZero()) :
             1/value
@@ -70,3 +70,21 @@ mystery(n) =
 mystery(0)
 mystery(1)
 mystery(2)
+
+print_line(str, line_end=10) =
+    let col = 0
+    for c in str
+        print(c)
+        col += 1
+            if col == line_end
+                signal(Exception())
+                col = 0
+            end
+        end
+    end
+
+print_line("Hi, everybody! How are you feeling today?")
+
+handling(Exception) => (c) -> println("signal") do 
+    print_line("Hi, everybody! How are you feeling today?")
+end
