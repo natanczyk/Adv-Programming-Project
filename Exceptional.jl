@@ -1,8 +1,10 @@
 # Custom exception
 struct DivisionByZero <: Exception end
 struct EscapeException <: Exception
+    id
     value
 end
+
 
 # Define global stacks for restarts and handlers
 const RESTART_STACK = Vector{Vector{Pair{Symbol, Function}}}()
@@ -40,10 +42,10 @@ function handling(f::Function, handlers...)
 end
 
 # define restarts
-function with_restart(f::Function, handlers...)
-    to_escape() do exit
-        existing_handlers = map((name, callback),) -> (name => ((
-end
+# function with_restart(f::Function, handlers...)
+#     to_escape() do exit
+#         existing_handlers = map((name, callback),) -> (name => ((
+# end
 
 
 # Check if a restart is available
@@ -77,13 +79,15 @@ function invoke_restart(name::Symbol, args...)
 end
 
 function to_escape(f::Function)
+    id = gensym() 
     try
-        return f(x -> throw(EscapeException(x)))  # `x` is the exit function
+        return f(x -> throw(EscapeException(id, x)))  
     catch e
-        if e isa EscapeException
+        if e isa EscapeException && e.id == id 
             return e.value  # Return the escaped value
         else
             rethrow()
         end
     end
 end
+
