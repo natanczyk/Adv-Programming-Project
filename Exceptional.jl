@@ -41,18 +41,27 @@ function handling(f::Function, handlers...)
     end
 end
 
+
+
 # define restarts
-# function with_restart(f::Function, handlers...)
-#     to_escape() do exit
-#         existing_handlers = map((name, callback),) -> (name => ((
-# end
+function with_restart(f::Function, restarts...)
+   to_escape() do exit
+        new_restarts = map((name, callback) -> name => (args...) -> exit(callback(args...)), restarts)
+        push!(RESTART_STACK, collect(new_restarts))
+        try
+            return f()
+        finally
+            pop!(RESTART_STACK)  # Restore previous state by popping the stackframe
+        end
+    end
+end
 
 
 # Check if a restart is available
 function available_restart(name::Symbol)
     for frame in reverse(RESTART_STACK)
         for (restart_name, callback) in frame
-            if name  == restart_name
+            if name  === restart_name
                 return true
             end
         end
@@ -63,18 +72,17 @@ end
 
 
 # Invoke a restart
-# chatGPT Code!
 function invoke_restart(name::Symbol, args...)
     if available_restart(name)
         for frame in reverse(RESTART_STACK)
             for (restart_name, callback) in frame
-                if name  == restart_name
-                    return callback
+                if name  === restart_name
+                    return callback(args...)
                 end
             end
         end
     else
-        error("Restart $name not available")
+        error("No callback found!")
     end
 end
 
@@ -91,3 +99,4 @@ function to_escape(f::Function)
     end
 end
 
+# exiting_handlers = map((name, callback),) -> (name => ((
