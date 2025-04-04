@@ -1,6 +1,7 @@
-#Define exception types
+# Define exception types
 struct DivisionByZero <: Exception end
 struct LineEndLimit <: Exception end
+struct BadLetter <: Exception end
 struct EscapeException <: Exception
     id
     value
@@ -8,7 +9,7 @@ end
 
 # Define global stacks for restarts and handlers
 const RESTART_STACK = Vector{Vector{Pair{Symbol, Function}}}()
-const HANDLER_STACK = Vector{Vector{Pair{Type{DivisionByZero}, Function}}}()
+const HANDLER_STACK = Vector{Vector{Pair{Type{<:Exception}, Function}}}()
 
 # Execute most recent handler
 function signal(e::Exception, mustBeHandled::Bool = false)
@@ -54,11 +55,11 @@ function to_escape(f::Function)
     end
 end
 
-#Writing restarts on stack with defined exit points
+# Writing restarts on stack with defined exit points
 function with_restart(f::Function, restarts...)
    to_escape() do exit
-        #map callback to anonymous function that calls exit with callback(args...) to create non-local transer of control point
-        new_restarts = map((name, callback) -> name => (args...) -> exit(callback(args...)), restarts) 
+        # map callback to anonymous function that calls exit with callback(args...) to create non-local transer of control point
+        new_restarts = map(((name, callback), ) -> name => (args...) -> exit(callback(args...)), restarts) 
         push!(RESTART_STACK, collect(new_restarts))
         try
             return f()
@@ -71,7 +72,7 @@ end
 # Check if a restart is available
 function available_restart(name::Symbol)
     for frame in reverse(RESTART_STACK)
-        for (restart_name, callback) in frame
+        for (restart_name, _) in frame
             if name  === restart_name
                 return true
             end
@@ -84,10 +85,10 @@ end
 #If restart available from stack, return the callback with arugments
 function invoke_restart(name::Symbol, args...)
     if available_restart(name)
-        for frame in reverse(RESTART_STACK)
+        for frame in Iterators.reverse(RESTART_STACK)
             for (restart_name, callback) in frame
                 if name  === restart_name
-                    return callback(args...)
+                    callback(args...)
                 end
             end
         end
