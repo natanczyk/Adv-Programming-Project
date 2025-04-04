@@ -1,11 +1,11 @@
 
 # Provides functions to test the exception handling
-module TestFunctionProvider
+#module TestFunctionProvider
 
-    export  DivisionByZero, LineEndLimit, reciprocal_error, reciprocal_restart, reciprocal_signal, mystery, infinity, print_line
+    #export  DivisionByZero, LineEndLimit, reciprocal_error, reciprocal_restart, reciprocal_signal, mystery, infinity, print_line
 
-    include("Exceptional.jl")
-    using .ExceptionHandling
+    #include("Exceptional.jl")
+    #using .ExceptionHandling
 
     # Define custom exception-types
     struct DivisionByZero <: Exception end
@@ -13,7 +13,7 @@ module TestFunctionProvider
 
     reciprocal_error(x) =
         x == 0 ?
-            ExceptionHandling.error(DivisionByZero()) :
+            error(DivisionByZero()) :
             1/x
 
     reciprocal_signal(x) =
@@ -62,17 +62,17 @@ module TestFunctionProvider
                 end
             end
         end
-end
+#end
 
 
 
 
 
-module ExceptionHandlingTests
+#module ExceptionHandlingTests
 
-    include("Exceptional.jl")
-    using Main.ExceptionHandling, .TestFunctionProvider, Test
-
+    #include("Exceptional.jl")
+    #using Main.ExceptionHandling, .TestFunctionProvider, Test
+    using Test
 
     @testset "Error Testset" begin
         @test           reciprocal_error(42) == 1/42
@@ -188,4 +188,4 @@ module ExceptionHandlingTests
                 reciprocal_error(0)
             end
     end
-end
+#end

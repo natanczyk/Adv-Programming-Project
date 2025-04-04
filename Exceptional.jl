@@ -1,8 +1,8 @@
 
 # provides functionality for exception handling
-module ExceptionHandling
+#module ExceptionHandling
 
-    export signal, error, handling, to_escape, with_restart, invoke_restart, available_restart
+    #export signal, error, handling, to_escape, with_restart, invoke_restart, available_restart
 
     struct EscapeException <: Exception
         id
@@ -36,6 +36,8 @@ module ExceptionHandling
     function error(e::Exception)
         signal(e, true)
     end
+
+
 
     # Add handler to handlerstack 
     function handling(f::Function, handlers...) 
@@ -106,5 +108,5 @@ module ExceptionHandling
         end
     end
 
-end
+#end
 
